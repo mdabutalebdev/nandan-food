@@ -1,0 +1,141 @@
+@import "tailwindcss";
+
+/* ------------------------------------------------------------------ *
+ * Nandon Foods — brand theme
+ * Green (fresh/primary) + Maroon (deep-red/secondary) + Cream accent.
+ * Layout DNA mirrors kazifarmskitchen.com: light page, ~1280px frame,
+ * Open Sans body, uppercase nav.
+ * ------------------------------------------------------------------ */
+
+@theme {
+  /* Brand — kazifarmskitchen.com colour grading: red + white + grey */
+  --color-brand: #e11b22;        /* kazi red — primary accent */
+  --color-brand-dark: #b3141b;   /* darker red (hover/press) */
+  --color-brand-600: #c8161d;
+  --color-brand-tint: #fdeaea;   /* pale red wash */
+
+  --color-maroon: #a5141b;       /* deep red — top bar / secondary */
+  --color-maroon-dark: #7d0f14;  /* deepest red — footer */
+  --color-maroon-tint: #fbeaea;
+
+  --color-nav: #d21f26;          /* red nav bar */
+  --color-nav-hover: #b9161d;    /* nav item hover */
+
+  --color-cream: #ffffff;        /* white accents on red surfaces */
+  --color-cream-soft: #fff5f5;
+
+  --color-ink: #444444;          /* kazi body text grey */
+  --color-ink-soft: #6f6f6f;
+  --color-line: #e8e8e8;         /* hairlines */
+  --color-page: #f5f5f5;         /* page background (same as kazi) */
+  --color-surface: #fcfcfc;      /* header / footer surface (kazi) */
+
+  /* Typography */
+  --font-sans: var(--font-open-sans), "Open Sans", system-ui, sans-serif;
+  --font-display: var(--font-poppins), var(--font-open-sans), sans-serif;
+
+  /* Frame */
+  --spacing-frame: 1280px;
+}
+
+:root {
+  --background: var(--color-page);
+  --foreground: var(--color-ink);
+}
+
+html {
+  scroll-behavior: smooth;
+}
+
+body {
+  background: var(--background);
+  color: var(--foreground);
+  font-family: var(--font-sans);
+  font-size: 15px;
+  line-height: 1.6;
+  -webkit-font-smoothing: antialiased;
+}
+
+h1, h2, h3, h4, h5 {
+  font-family: var(--font-display);
+  line-height: 1.15;
+}
+
+/* Centered content frame, like kazifarms' fixed ~1265px container */
+.frame {
+  width: 100%;
+  max-width: var(--spacing-frame);
+  margin-inline: auto;
+  padding-inline: 1rem;
+}
+
+/* Nav label — normal case (First capital, rest as written) */
+.nav-label {
+  text-transform: none;
+  letter-spacing: 0.01em;
+  font-weight: 600;
+}
+
+/* Thin scrollbar for horizontal category rails */
+.no-scrollbar::-webkit-scrollbar { display: none; }
+.no-scrollbar { -ms-overflow-style: none; scrollbar-width: none; }
+
+/* Hero / marquee helpers */
+@keyframes fadeUp {
+  from { opacity: 0; transform: translateY(12px); }
+  to   { opacity: 1; transform: translateY(0); }
+}
+.fade-up { animation: fadeUp 0.5s ease both; }
+
+@keyframes ticker {
+  0%   { transform: translateX(0); }
+  100% { transform: translateX(-50%); }
+}
+.animate-ticker { animation: ticker 22s linear infinite; }
+
+/* Client logo marquees — two rows scrolling in opposite directions.
+   Each track holds its items twice, so -50% / +0 loops seamlessly. */
+@keyframes marquee-left {
+  0%   { transform: translateX(0); }
+  100% { transform: translateX(-50%); }
+}
+@keyframes marquee-right {
+  0%   { transform: translateX(-50%); }
+  100% { transform: translateX(0); }
+}
+.marquee-left  { animation: marquee-left  var(--marquee-duration, 32s) linear infinite; }
+.marquee-right { animation: marquee-right var(--marquee-duration, 32s) linear infinite; }
+.marquee-row:hover .marquee-left,
+.marquee-row:hover .marquee-right { animation-play-state: paused; }
+
+/* Offset anchored sections so the sticky header doesn't cover the heading. */
+.scroll-anchor { scroll-margin-top: 7rem; }
+
+/* Placeholder for the admin rich-text editor when empty. */
+.rte:empty::before {
+  content: attr(data-placeholder);
+  color: var(--color-ink-soft);
+  pointer-events: none;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .marquee-left, .marquee-right, .animate-ticker { animation: none; }
+}
+
+/* ------------------------------------------------------------------ *
+ * Print — used by the admin invoice sheet.
+ * Everything chrome-like (sidebar, topbar, action buttons) drops away so
+ * only the invoice body reaches the paper.
+ * ------------------------------------------------------------------ */
+@media print {
+  .print-hide { display: none !important; }
+  .print-reset { padding: 0 !important; margin: 0 !important; }
+  .print-full { max-width: 100% !important; width: 100% !important; }
+  .print-plain {
+    border: 0 !important;
+    box-shadow: none !important;
+    border-radius: 0 !important;
+  }
+  body { background: #fff !important; font-size: 12px; }
+  @page { size: A4; margin: 12mm; }
+}
