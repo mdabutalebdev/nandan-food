@@ -1,0 +1,89 @@
+import { Request, Response } from 'express';
+import catchAsync from '../../utils/catchAsync';
+import sendResponse from '../../utils/sendResponse';
+import OrderService from './order.service';
+
+const OrderController = {
+    getAll: catchAsync(async (req: Request, res: Response) => {
+        const { orders, summary, meta } = await OrderService.getAllOrders(req.query as Record<string, unknown>);
+        sendResponse(res, {
+            statusCode: 200,
+            success: true,
+            message: 'Orders fetched',
+            data: { rows: orders, summary },
+            meta,
+        });
+    }),
+
+    getMyOrders: catchAsync(async (req: Request, res: Response) => {
+        const { orders, meta } = await OrderService.getMyOrders(req.user!.userId, req.query as Record<string, unknown>);
+        sendResponse(res, { statusCode: 200, success: true, message: 'My orders fetched', data: orders, meta });
+    }),
+
+    getById: catchAsync(async (req: Request, res: Response) => {
+        const isAdmin = req.user!.role === 'admin';
+        const order = await OrderService.getOrderById(req.params.id, isAdmin ? undefined : req.user!.userId);
+        sendResponse(res, { statusCode: 200, success: true, message: 'Order fetched', data: order });
+    }),
+
+    create: catchAsync(async (req: Request, res: Response) => {
+        const order = await OrderService.createOrder(req.user!.userId, req.body);
+        sendResponse(res, { statusCode: 201, success: true, message: 'Order placed successfully', data: order });
+    }),
+
+    createManual: catchAsync(async (req: Request, res: Response) => {
+        const order = await OrderService.createManualOrder(req.user!.userId, req.body);
+        sendResponse(res, { statusCode: 201, success: true, message: 'Invoice created', data: order });
+    }),
+
+    update: catchAsync(async (req: Request, res: Response) => {
+        const order = await OrderService.updateOrder(req.params.id, req.body);
+        sendResponse(res, { statusCode: 200, success: true, message: 'Order updated', data: order });
+    }),
+
+    updateStatus: catchAsync(async (req: Request, res: Response) => {
+        const order = await OrderService.updateOrderStatus(req.params.id, req.body.status, req.body.note);
+        sendResponse(res, { statusCode: 200, success: true, message: 'Order status updated', data: order });
+    }),
+
+    updatePaymentStatus: catchAsync(async (req: Request, res: Response) => {
+        const order = await OrderService.updatePaymentStatus(req.params.id, req.body.paymentStatus);
+        sendResponse(res, { statusCode: 200, success: true, message: 'Payment status updated', data: order });
+    }),
+
+    addNote: catchAsync(async (req: Request, res: Response) => {
+        const order = await OrderService.addAdminNote(req.params.id, req.body.note);
+        sendResponse(res, { statusCode: 200, success: true, message: 'Note added', data: order });
+    }),
+
+    cancel: catchAsync(async (req: Request, res: Response) => {
+        const order = await OrderService.cancelOrder(req.params.id, req.user!.userId);
+        sendResponse(res, { statusCode: 200, success: true, message: 'Order cancelled', data: order });
+    }),
+
+    delete: catchAsync(async (req: Request, res: Response) => {
+        await OrderService.deleteOrder(req.params.id);
+        sendResponse(res, { statusCode: 200, success: true, message: 'Order deleted' });
+    }),
+
+    getStats: catchAsync(async (req: Request, res: Response) => {
+        const stats = await OrderService.getOrderStats();
+        sendResponse(res, { statusCode: 200, success: true, message: 'Order stats fetched', data: stats });
+    }),
+
+    guestCheckout: catchAsync(async (req: Request, res: Response) => {
+        const result = await OrderService.createGuestOrder(req.body);
+        const message = result.isNewUser
+            ? 'Order placed successfully! An account has been created for you. Your phone number is your password.'
+            : 'Order placed successfully!';
+        sendResponse(res, { statusCode: 201, success: true, message, data: result });
+    }),
+
+    trackOrder: catchAsync(async (req: Request, res: Response) => {
+        const { orderId, phone } = req.body;
+        const order = await OrderService.trackOrder(orderId, phone);
+        sendResponse(res, { statusCode: 200, success: true, message: 'Order found', data: order });
+    }),
+};
+
+export default OrderController;

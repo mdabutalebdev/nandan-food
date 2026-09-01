@@ -1,0 +1,8 @@
+node_modules
+dist
+*.log
+
+# Environment variables (never commit real secrets)
+.env
+.env.local
+.env.*.local
